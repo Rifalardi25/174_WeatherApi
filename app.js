@@ -23,8 +23,18 @@ app.get("/api/lokasi", async (req, res) => {
             return res.status(404).json({ message: "Lokasi tidak ditemukan" });
         }
 
-        const lokasi = data.features[0].matching_text;
-        const koordinat = data.features[0].geometry.coordinates;
+        const feature = data.features[0];
+        const koordinat = feature.geometry.coordinates;
+
+        let negara = "-", provinsi = "-", kecamatan = "-";
+        
+        if (feature.context) {
+            feature.context.forEach(c => {
+                if (c.id.startsWith("country")) negara = c.text;
+                if (c.id.startsWith("region") || c.id.startsWith("province")) provinsi = c.text;
+                if (c.id.startsWith("county") || c.id.startsWith("municipality")) kecamatan = c.text;
+            });
+        }
 
         res.json({
             kota: lokasi,
