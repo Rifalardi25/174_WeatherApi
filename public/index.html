@@ -1,49 +1,146 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geolocation</title>
+    <title>Pencarian Lokasi Cuaca</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            color: #333;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 450px;
+            backdrop-filter: blur(10px);
+        }
+        h2 { text-align: center; color: #1e3c72; margin-top: 0; }
+        .input-group { display: flex; margin-bottom: 25px; }
+        input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px 0 0 8px;
+            outline: none;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        input:focus { border-color: #2a5298; }
+        button {
+            padding: 12px 20px;
+            border: none;
+            background: #2a5298;
+            color: white;
+            cursor: pointer;
+            border-radius: 0 8px 8px 0;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background 0.3s, transform 0.1s;
+        }
+        button:hover { background: #1e3c72; }
+        button:active { transform: scale(0.98); }
+        /* Ubah display: none menjadi block agar langsung tampil */
+        .result-container { display: block; }
+        .result-item {
+            background: #f1f5f9;
+            margin: 10px 0;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border-left: 5px solid #2a5298;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .result-item strong { color: #64748b; font-size: 0.9em; text-transform: uppercase;}
+        .result-item span { font-size: 1.1em; font-weight: bold; color: #0f172a; text-align: right;}
+        .coord-group { display: flex; gap: 10px; }
+        .coord-group .result-item { flex: 1; flex-direction: column; align-items: flex-start; }
+        .coord-group .result-item span { margin-top: 5px; }
+        .error { color: #ef4444; text-align: center; display: none; margin-bottom: 15px; font-weight: bold; }
+    </style>
 </head>
-
 <body>
 
-    <h3>Nama : </h3>
-    <h3>NIM : </h3>
+<div class="card">
+    <h2>Pencarian Data Lokasi</h2>
+    <div class="input-group">
+        <input type="text" id="lokasiInput" placeholder="Masukkan nama lokasi...">
+        <button onclick="cariLokasi()">Cari</button>
+    </div>
+    
+    <div id="errorMsg" class="error"></div>
+    
+    <div class="result-container" id="resultContainer">
+        <div class="result-item">
+            <strong>Negara</strong>
+            <span id="resNegara">-</span>
+        </div>
+        <div class="result-item">
+            <strong>Provinsi</strong>
+            <span id="resProvinsi">-</span>
+        </div>
+        <div class="result-item">
+            <strong>Kecamatan</strong>
+            <span id="resKecamatan">-</span>
+        </div>
+        
+        <div class="coord-group">
+            <div class="result-item">
+                <strong>Longitude</strong>
+                <span id="resLon">-</span>
+            </div>
+            <div class="result-item">
+                <strong>Latitude</strong>
+                <span id="resLat">-</span>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <p>
-        Kota :
-        <span id="lokasi"></span>
-    </p>
+<script>
+    async function cariLokasi() {
+        const input = document.getElementById('lokasiInput').value;
+        const errorMsg = document.getElementById('errorMsg');
+        
+        if (!input.trim()) return;
 
-    <hr>
 
-    <p>
-        Koordinat :
-        <span id="negara"></span>
-    </p>
+        errorMsg.style.display = 'none';
 
-    <script>
+        try {
+            const response = await fetch(`/api/lokasi?kota=${encodeURIComponent(input)}`);
+            const data = await response.json();
 
-        fetch("/api/lokasi")
-            .then(response => response.json())
-            .then(data => {
+            if (!response.ok) throw new Error(data.message || 'Terjadi kesalahan');
 
-                console.log(data);
+            document.getElementById('resNegara').innerText = data.negara || '-';
+            document.getElementById('resProvinsi').innerText = data.provinsi || '-';
+            document.getElementById('resKecamatan').innerText = data.kecamatan || '-';
+            document.getElementById('resLon').innerText = data.longitude || '-';
+            document.getElementById('resLat').innerText = data.latitude || '-';
 
-                document.getElementById("lokasi").innerHTML = data.kota;
-
-                document.getElementById("negara").innerHTML =
-                    data.koordinat;
-
-            })
-            .catch(error => {
-
-                console.error(error);
-
-            });
-
-    </script>
-
+        } catch (error) {
+            errorMsg.style.display = 'block';
+            errorMsg.innerText = error.message;
+            
+            document.getElementById('resNegara').innerText = '-';
+            document.getElementById('resProvinsi').innerText = '-';
+            document.getElementById('resKecamatan').innerText = '-';
+            document.getElementById('resLon').innerText = '-';
+            document.getElementById('resLat').innerText = '-';
+        }
+    }
+</script>
 </body>
 </html>
