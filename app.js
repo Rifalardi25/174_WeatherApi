@@ -37,8 +37,11 @@ app.get("/api/lokasi", async (req, res) => {
         }
 
         res.json({
-            kota: lokasi,
-            koordinat: koordinat
+            negara: negara,
+            provinsi: provinsi,
+            kecamatan: kecamatan,
+            longitude: koordinat[0],
+            latitude: koordinat[1]
         });
 
     } catch (error) {
