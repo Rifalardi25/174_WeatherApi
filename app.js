@@ -19,6 +19,10 @@ app.get("/api/lokasi", async (req, res) => {
 
         const data = response.data;
 
+        if (data.features.length === 0) {
+            return res.status(404).json({ message: "Lokasi tidak ditemukan" });
+        }
+
         const lokasi = data.features[0].matching_text;
         const koordinat = data.features[0].geometry.coordinates;
 
