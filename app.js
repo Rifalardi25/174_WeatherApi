@@ -8,7 +8,7 @@ const PORT = 3000;
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/api/lokasi", async (req, res) => {
-    const kota = "jakarta";
+    const kota = req.query.kota || "jakarta"; 
 
     const apiKey = "n9Yl9N8NR6NOrwRw4SAI";
 
